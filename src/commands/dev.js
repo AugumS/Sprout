@@ -68,6 +68,37 @@ module.exports = {
     )
     .addSubcommand((sub) =>
       sub
+        .setName('craft')
+        .setDescription('Give a tool with exact stat values to a user.')
+        .addStringOption((o) =>
+          o.setName('type').setDescription('Tool type').setRequired(true)
+            .addChoices(...listToolTypes().map((t) => ({ name: t.name, value: t.id })))
+        )
+        .addStringOption((o) =>
+          o.setName('rarity').setDescription('Rarity').setRequired(true)
+            .addChoices(...RARITY_ORDER.map((r) => ({ name: r, value: r })))
+        )
+        .addStringOption((o) =>
+          o.setName('user_id').setDescription('Target user ID (defaults to yourself)')
+        )
+        .addIntegerOption((o) =>
+          o.setName('grow_reduction').setDescription('Grow Reduction % (hoe primary)').setMinValue(1).setMaxValue(100)
+        )
+        .addIntegerOption((o) =>
+          o.setName('yield_bonus').setDescription('Yield Bonus % (watering can primary)').setMinValue(1).setMaxValue(100)
+        )
+        .addIntegerOption((o) =>
+          o.setName('shears_bonus').setDescription('Harvest Bonus % (shears primary)').setMinValue(1).setMaxValue(100)
+        )
+        .addIntegerOption((o) =>
+          o.setName('golden_chance').setDescription('Golden Chance % (secondary)').setMinValue(1).setMaxValue(100)
+        )
+        .addIntegerOption((o) =>
+          o.setName('tool_find').setDescription('Tool Find % (secondary)').setMinValue(1).setMaxValue(100)
+        )
+    )
+    .addSubcommand((sub) =>
+      sub
         .setName('inspect')
         .setDescription('Dump raw DB state for a user.')
         .addStringOption((o) =>
@@ -148,6 +179,37 @@ module.exports = {
         embeds: [new EmbedBuilder()
           .setDescription('Account wiped. You start fresh next time you run a command.')
           .setColor(0xe74c3c)],
+        ephemeral: true,
+      });
+      return;
+    }
+
+    if (sub === 'craft') {
+      const toolTypeId = interaction.options.getString('type', true);
+      const rarity     = interaction.options.getString('rarity', true);
+      const targetId   = interaction.options.getString('user_id') || selfId;
+      const type       = getToolType(toolTypeId);
+
+      const statKeys = ['grow_reduction', 'yield_bonus', 'shears_bonus', 'golden_chance', 'tool_find'];
+      const stats = {};
+      for (const key of statKeys) {
+        const val = interaction.options.getInteger(key);
+        if (val !== null) stats[key] = val;
+      }
+
+      if (Object.keys(stats).length === 0) {
+        await interaction.reply({ content: 'Specify at least one stat value.', ephemeral: true });
+        return;
+      }
+
+      db.getOrCreateUser(targetId);
+      const toolId = db.addTool(targetId, toolTypeId, rarity, stats);
+      const statSummary = Object.entries(stats).map(([k, v]) => `${k}: **${v}%**`).join(', ');
+
+      await interaction.reply({
+        embeds: [new EmbedBuilder()
+          .setDescription(`Crafted ${RARITY_CIRCLE[rarity] || '⚪'} ${type.emoji} **${rarity} ${type.name}** \`#${toolId}\` → \`${targetId}\`\n${statSummary}`)
+          .setColor(0xa855f7)],
         ephemeral: true,
       });
       return;
