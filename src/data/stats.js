@@ -1,11 +1,11 @@
 const { getBonus, RARITY_TIERS } = require('./tools');
 
 const STAT_DEFS = {
-  grow_reduction: { name: 'Grow Reduction', emoji: '⏱️', primary_for: 'hoe' },
-  yield_bonus:    { name: 'Yield Bonus',    emoji: '💰', primary_for: 'wateringcan' },
-  shears_bonus:   { name: 'Harvest Bonus',  emoji: '✂️', primary_for: 'shears' },
-  golden_chance:  { name: 'Golden Chance',  emoji: '⭐' },
-  tool_find:      { name: 'Tool Find',      emoji: '🔍' },
+  grow_reduction: { name: 'Grow Reduction', emoji: '⏱️', primary_for: 'hoe',         description: 'Reduces how long crops take to grow' },
+  yield_bonus:    { name: 'Yield Bonus',    emoji: '💰', primary_for: 'wateringcan',  description: 'Increases coins earned per harvest' },
+  shears_bonus:   { name: 'Harvest Bonus',  emoji: '✂️', primary_for: 'shears',       description: 'Chance to earn a bonus payout on each crop' },
+  golden_chance:  { name: 'Golden Chance',  emoji: '⭐',                              description: 'Chance for a crop to yield a golden bonus payout' },
+  tool_find:      { name: 'Tool Find',      emoji: '🔍',                              description: 'Increased chance to find a tool while harvesting' },
 };
 
 // Rolled primary stat range per rarity (percentage points)

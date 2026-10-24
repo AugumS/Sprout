@@ -66,13 +66,13 @@ module.exports = {
           const def = STAT_DEFS[key];
           if (!def) return null;
           const isPrimary = def.primary_for === tool.item_id;
+          const desc = def.description ? ` — *${def.description}*` : '';
           if (isPrimary) {
-            const desc = type?.description || '';
-            return `${def.emoji} **${def.name}:** ${val}% / ${rarityMax}% max — *${desc}*`;
+            return `${def.emoji} **${def.name}:** ${val}% / ${rarityMax}% max${desc}`;
           }
           const range = getStatRange(key, tool.item_id, tool.rarity);
           const rangeStr = range ? ` *(${range[0]}–${range[1]})*` : '';
-          return `${def.emoji} **${def.name}:** ${val}%${rangeStr}`;
+          return `${def.emoji} **${def.name}:** ${val}%${rangeStr}${desc}`;
         }).filter(Boolean)
       : ['*No stats (legacy tool)*'];
 
