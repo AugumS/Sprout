@@ -51,6 +51,17 @@ function getLevelBonus(level) {
   return Math.max(0, level - 1) * 0.005;
 }
 
+// Returns [min, max] roll range for a given stat key on a specific tool type + rarity.
+function getStatRange(statKey, toolTypeId, rarity) {
+  const [pMin, pMax] = PRIMARY_RANGES[rarity] || [1, 5];
+  const def = STAT_DEFS[statKey];
+  if (!def) return null;
+  if (def.primary_for === toolTypeId) return [pMin, pMax];
+  // Secondary stat range
+  const secMax = Math.max(1, Math.round(pMax * 0.45));
+  return [1, secMax];
+}
+
 function rollBetween(min, max) {
   return Math.round(min + Math.random() * (max - min));
 }
@@ -144,6 +155,7 @@ module.exports = {
   expToNextLevel,
   getLevelBonus,
   rollStats,
+  getStatRange,
   formatStats,
   getEffectivePrimary,
   getEffectiveShears,

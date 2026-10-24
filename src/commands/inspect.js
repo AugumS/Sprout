@@ -2,7 +2,9 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const db = require('../db');
 const { getToolType, RARITY_TIERS, RARITY_CIRCLE } = require('../data/tools');
 const {
+  STAT_DEFS,
   formatStats,
+  getStatRange,
   getEffectivePrimary,
   MAX_LEVEL,
   expToLevel,
@@ -57,7 +59,15 @@ module.exports = {
     const sellValue = Math.round((RARITY_TIERS[tool.rarity]?.shopPrice || 0) * 0.4);
 
     const stats = tool.stats ? JSON.parse(tool.stats) : null;
-    const statLines = stats ? formatStats(stats) : ['*No stats (legacy tool)*'];
+    const statLines = stats
+      ? Object.entries(stats).map(([key, val]) => {
+          const def = STAT_DEFS[key];
+          if (!def) return null;
+          const range = getStatRange(key, tool.item_id, tool.rarity);
+          const rangeStr = range ? ` *(${range[0]}–${range[1]})*` : '';
+          return `${def.emoji} **${def.name}:** ${val}%${rangeStr}`;
+        }).filter(Boolean)
+      : ['*No stats (legacy tool)*'];
 
     const totalExp = tool.exp || 0;
     const level = expToLevel(totalExp);
