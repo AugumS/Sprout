@@ -78,7 +78,7 @@ function rollStats(toolTypeId, rarity) {
 
   const secondaryCount = SECONDARY_COUNT[rarity] || 0;
   const pool = Object.entries(STAT_DEFS)
-    .filter(([k, v]) => !v.primary_for || v.primary_for !== toolTypeId)
+    .filter(([, v]) => !v.primary_for)
     .map(([k]) => k);
 
   for (let i = 0; i < secondaryCount && pool.length > 0; i++) {
