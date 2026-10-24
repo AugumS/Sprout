@@ -1,0 +1,21 @@
+{
+  "name": "farm-bot",
+  "version": "0.1.0",
+  "description": "An original farming-sim Discord bot — plant, grow, and harvest crops, collect rarity-tiered tools, and expand your garden.",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "deploy-commands": "node src/deploy-commands.js",
+    "check": "node --check src/index.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.3.0",
+    "discord.js": "^14.24.2",
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "license": "MIT"
+}
