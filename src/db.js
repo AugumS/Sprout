@@ -641,6 +641,16 @@ function resetUser(userId) {
   db.prepare(`DELETE FROM users WHERE id = ?`).run(userId);
 }
 
+const REROLL_COST = 1000;
+
+function rerollShop(userId) {
+  const user = getOrCreateUser(userId);
+  if (user.currency < REROLL_COST) return { ok: false, reason: 'no_funds' };
+  addCurrency(userId, -REROLL_COST);
+  generateShopStock(userId);
+  return { ok: true };
+}
+
 module.exports = {
   getOrCreateUser,
   addCurrency,
@@ -680,6 +690,7 @@ module.exports = {
   getShopStock,
   shopNextRefresh,
   buyShopSlot,
+  rerollShop,
   isToolListed,
   createListing,
   cancelListing,

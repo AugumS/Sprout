@@ -21,6 +21,25 @@ client.once(Events.ClientReady, (readyClient) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
+  if (interaction.isButton()) {
+    const [prefix] = interaction.customId.split(':');
+    if (prefix === 'shop_reroll') {
+      const shop = client.commands.get('shop');
+      try {
+        await shop.handleButton(interaction);
+      } catch (error) {
+        console.error('Error handling shop reroll button:', error);
+        const payload = { content: 'Something went wrong.', ephemeral: true };
+        if (interaction.replied || interaction.deferred) {
+          await interaction.followUp(payload).catch(() => {});
+        } else {
+          await interaction.reply(payload).catch(() => {});
+        }
+      }
+    }
+    return;
+  }
+
   if (!interaction.isChatInputCommand()) return;
 
   const command = client.commands.get(interaction.commandName);
