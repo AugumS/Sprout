@@ -60,7 +60,7 @@ module.exports = {
     const sellValue = Math.round((RARITY_TIERS[tool.rarity]?.shopPrice || 0) * 0.4);
 
     const stats = tool.stats ? JSON.parse(tool.stats) : null;
-    const rarityMax = (PRIMARY_RANGES[tool.rarity] || [1, 5])[1];
+    const [rarityMin, rarityMax] = PRIMARY_RANGES[tool.rarity] || [1, 5];
     const statLines = stats
       ? Object.entries(stats).map(([key, val]) => {
           const def = STAT_DEFS[key];
@@ -68,7 +68,7 @@ module.exports = {
           const isPrimary = def.primary_for === tool.item_id;
           const desc = def.description ? ` — *${def.description}*` : '';
           if (isPrimary) {
-            return `${def.emoji} **${def.name}:** ${val}% / ${rarityMax}% max${desc}`;
+            return `${def.emoji} **${def.name}:** ${val}% *(${rarityMin}–${rarityMax})*${desc}`;
           }
           const range = getStatRange(key, tool.item_id, tool.rarity);
           const rangeStr = range ? ` *(${range[0]}–${range[1]})*` : '';
