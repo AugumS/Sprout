@@ -3,6 +3,7 @@ const db = require('../db');
 const { getToolType, RARITY_TIERS, RARITY_CIRCLE } = require('../data/tools');
 const {
   STAT_DEFS,
+  PRIMARY_RANGES,
   formatStats,
   getStatRange,
   getEffectivePrimary,
@@ -59,10 +60,16 @@ module.exports = {
     const sellValue = Math.round((RARITY_TIERS[tool.rarity]?.shopPrice || 0) * 0.4);
 
     const stats = tool.stats ? JSON.parse(tool.stats) : null;
+    const rarityMax = (PRIMARY_RANGES[tool.rarity] || [1, 5])[1];
     const statLines = stats
       ? Object.entries(stats).map(([key, val]) => {
           const def = STAT_DEFS[key];
           if (!def) return null;
+          const isPrimary = def.primary_for === tool.item_id;
+          if (isPrimary) {
+            const desc = type?.description || '';
+            return `${def.emoji} **${def.name}:** ${val}% / ${rarityMax}% max — *${desc}*`;
+          }
           const range = getStatRange(key, tool.item_id, tool.rarity);
           const rangeStr = range ? ` *(${range[0]}–${range[1]})*` : '';
           return `${def.emoji} **${def.name}:** ${val}%${rangeStr}`;
