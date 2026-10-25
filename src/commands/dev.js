@@ -96,6 +96,21 @@ module.exports = {
         .addIntegerOption((o) =>
           o.setName('tool_find').setDescription('Tool Find % (secondary)').setMinValue(1).setMaxValue(100)
         )
+        .addIntegerOption((o) =>
+          o.setName('bonus_yield').setDescription('Bonus Yield % chance per plot (secondary)').setMinValue(1).setMaxValue(100)
+        )
+        .addIntegerOption((o) =>
+          o.setName('xp_boost').setDescription('XP Boost flat bonus EXP per use (secondary)').setMinValue(1).setMaxValue(500)
+        )
+        .addIntegerOption((o) =>
+          o.setName('coin_bonus').setDescription('Coin Bonus % added to total coins (secondary)').setMinValue(1).setMaxValue(100)
+        )
+        .addIntegerOption((o) =>
+          o.setName('seed_return').setDescription('Seed Return % chance per plot (secondary)').setMinValue(1).setMaxValue(100)
+        )
+        .addIntegerOption((o) =>
+          o.setName('double_drop').setDescription('Double Drop % chance (secondary, max effective 5)').setMinValue(1).setMaxValue(5)
+        )
     )
     .addSubcommand((sub) =>
       sub
@@ -190,7 +205,7 @@ module.exports = {
       const targetId   = interaction.options.getString('user_id') || selfId;
       const type       = getToolType(toolTypeId);
 
-      const statKeys = ['grow_reduction', 'yield_bonus', 'shears_bonus', 'golden_chance', 'tool_find'];
+      const statKeys = ['grow_reduction', 'yield_bonus', 'shears_bonus', 'golden_chance', 'tool_find', 'bonus_yield', 'xp_boost', 'coin_bonus', 'seed_return', 'double_drop'];
       const stats = {};
       for (const key of statKeys) {
         const val = interaction.options.getInteger(key);
