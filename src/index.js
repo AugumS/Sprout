@@ -3,7 +3,13 @@ const path = require('path');
 const { Client, GatewayIntentBits, Collection, Events } = require('discord.js');
 const config = require('./config');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.GuildMembers,
+  ],
+});
 client.commands = new Collection();
 
 const commandsDir = path.join(__dirname, 'commands');
@@ -79,6 +85,27 @@ client.on(Events.InteractionCreate, async (interaction) => {
     } else {
       await interaction.reply(payload).catch(() => {});
     }
+  }
+});
+
+// Verification gate: ✅ reaction in #rules → @Farmer role
+client.on(Events.MessageReactionAdd, async (reaction, user) => {
+  if (user.bot) return;
+  if (reaction.partial) {
+    try { await reaction.fetch(); } catch { return; }
+  }
+  if (reaction.message.channel?.name !== 'rules') return;
+  if (reaction.emoji.name !== '✅') return;
+
+  try {
+    const guild = reaction.message.guild;
+    const member = await guild.members.fetch(user.id);
+    const farmerRole = guild.roles.cache.find((r) => r.name === 'Farmer');
+    if (!farmerRole || member.roles.cache.has(farmerRole.id)) return;
+    await member.roles.add(farmerRole);
+    console.log(`Gave @Farmer to ${user.tag}`);
+  } catch (err) {
+    console.error('Reaction role error:', err);
   }
 });
 

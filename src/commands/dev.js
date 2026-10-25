@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 const db = require('../db');
 const { listCrops, getCrop } = require('../data/crops');
 const { listToolTypes, getToolType, RARITY_ORDER, RARITY_CIRCLE } = require('../data/tools');
@@ -111,6 +111,11 @@ module.exports = {
         .addIntegerOption((o) =>
           o.setName('double_drop').setDescription('Double Drop % chance (secondary, max effective 5)').setMinValue(1).setMaxValue(5)
         )
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('gate')
+        .setDescription('Lock all channels behind @Farmer and post the ✅ rules message in #rules.')
     )
     .addSubcommand((sub) =>
       sub
@@ -227,6 +232,83 @@ module.exports = {
           .setColor(0xa855f7)],
         ephemeral: true,
       });
+      return;
+    }
+
+    if (sub === 'gate') {
+      await interaction.deferReply({ ephemeral: true });
+
+      const guild = interaction.guild;
+      const everyoneRole = guild.roles.everyone;
+      const farmerRole = guild.roles.cache.find((r) => r.name === 'Farmer');
+
+      if (!farmerRole) {
+        await interaction.editReply('Could not find @Farmer role. Run `/dev setup` first.');
+        return;
+      }
+
+      // Strip ViewChannel from @everyone's base permissions
+      const currentPerms = everyoneRole.permissions;
+      await everyoneRole.setPermissions(
+        currentPerms.remove([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.Connect, PermissionFlagsBits.Speak])
+      );
+
+      const channels = await guild.channels.fetch();
+      let rulesChannel = null;
+      let updated = 0;
+
+      for (const [, ch] of channels) {
+        if (!ch) continue;
+
+        if (ch.name === 'rules') {
+          rulesChannel = ch;
+          // Rules: @everyone can see, read-only
+          await ch.permissionOverwrites.edit(everyoneRole.id, {
+            ViewChannel: true,
+            SendMessages: false,
+            AddReactions: true,
+            ReadMessageHistory: true,
+          });
+        } else if (ch.type === ChannelType.GuildCategory) {
+          // Categories: deny @everyone, allow @Farmer
+          await ch.permissionOverwrites.edit(everyoneRole.id, { ViewChannel: false });
+          await ch.permissionOverwrites.edit(farmerRole.id, { ViewChannel: true, Connect: true, Speak: true });
+        } else {
+          // Text/voice channels: let category overwrites cascade
+          await ch.permissionOverwrites.edit(everyoneRole.id, { ViewChannel: false });
+          await ch.permissionOverwrites.edit(farmerRole.id, { ViewChannel: true });
+        }
+        updated++;
+      }
+
+      // Post the rules + verification message
+      if (rulesChannel) {
+        const msgs = await rulesChannel.messages.fetch({ limit: 10 });
+        const existing = msgs.find((m) => m.author.id === guild.client.user.id && m.reactions.cache.has('✅'));
+        if (!existing) {
+          const rulesMsg = await rulesChannel.send({
+            embeds: [new EmbedBuilder()
+              .setTitle('📜 Server Rules')
+              .setDescription([
+                '**1.** Be respectful to all members.',
+                '**2.** No spam, self-promotion, or excessive pinging.',
+                '**3.** Keep discussions in the appropriate channels.',
+                '**4.** No NSFW content of any kind.',
+                '**5.** Follow Discord\'s [Terms of Service](https://discord.com/terms).',
+                '',
+                '> React with ✅ below to agree to the rules and unlock the server.',
+              ].join('\n'))
+              .setColor(0x27ae60)
+              .setFooter({ text: 'Welcome to Sprout 🌱' })],
+          });
+          await rulesMsg.react('✅');
+        }
+      }
+
+      await interaction.editReply(
+        `✅ Gate active — ${updated} channels locked behind @Farmer.\n` +
+        `New members see only #rules until they react with ✅.`
+      );
       return;
     }
 
