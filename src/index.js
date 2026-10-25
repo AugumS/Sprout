@@ -16,8 +16,19 @@ for (const file of fs.readdirSync(commandsDir).filter((f) => f.endsWith('.js')))
   client.commands.set(command.data.name, command);
 }
 
-client.once(Events.ClientReady, (readyClient) => {
+client.once(Events.ClientReady, async (readyClient) => {
   console.log(`Logged in as ${readyClient.user.tag}. ${client.commands.size} commands loaded.`);
+
+  if (process.env.RENDER) {
+    try {
+      const channel = await readyClient.channels.fetch('1563710154065838200');
+      const commit = process.env.RENDER_GIT_COMMIT?.slice(0, 7) || null;
+      const commitStr = commit ? ` · commit \`${commit}\`` : '';
+      await channel.send(`🌱 **Sprout updated and online!**${commitStr}`);
+    } catch (err) {
+      console.error('Failed to send deploy announcement:', err);
+    }
+  }
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
