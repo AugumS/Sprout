@@ -83,7 +83,7 @@ const CROPS = {
   },
 };
 
-const RARITY_ORDER = ['Common', 'Uncommon', 'Rare', 'Epic', 'Mythic'];
+const RARITY_ORDER = ['Common', 'Uncommon', 'Rare', 'Epic'];
 
 function getCrop(id) {
   return CROPS[id] || null;

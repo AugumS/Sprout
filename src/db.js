@@ -619,8 +619,8 @@ const buyListingTx = db.transaction((buyerId, listingId) => {
   if (!listing) return { ok: false, reason: 'not_found' };
   if (listing.seller_id === buyerId) return { ok: false, reason: 'own_listing' };
 
-  // Verify the tool still exists and belongs to the seller
-  const tool = db.prepare(`SELECT * FROM inventory WHERE id = ? AND user_id = ?`).get(listing.tool_id, listing.seller_id);
+  // Verify the tool still exists in market escrow
+  const tool = db.prepare(`SELECT * FROM inventory WHERE id = ? AND user_id = '__market__'`).get(listing.tool_id);
   if (!tool) {
     db.prepare(`DELETE FROM market_listings WHERE id = ?`).run(listingId);
     return { ok: false, reason: 'unavailable' };
@@ -642,11 +642,24 @@ function buyListing(buyerId, listingId) {
 }
 
 function resetUser(userId) {
+  // Delete escrowed tools before removing the listings row
+  db.prepare(`DELETE FROM inventory WHERE id IN (SELECT tool_id FROM market_listings WHERE seller_id = ?) AND user_id = '__market__'`).run(userId);
   db.prepare(`DELETE FROM inventory WHERE user_id = ?`).run(userId);
   db.prepare(`DELETE FROM plots WHERE user_id = ?`).run(userId);
   db.prepare(`DELETE FROM boosts WHERE user_id = ?`).run(userId);
   db.prepare(`DELETE FROM market_listings WHERE seller_id = ?`).run(userId);
   db.prepare(`DELETE FROM users WHERE id = ?`).run(userId);
+}
+
+const bulkSellToolsTx = db.transaction((userId, toolIds, totalCoins) => {
+  const del = db.prepare(`DELETE FROM inventory WHERE id = ? AND user_id = ?`);
+  for (const id of toolIds) del.run(id, userId);
+  const row = db.prepare(`UPDATE users SET currency = currency + ? WHERE id = ?`).run(totalCoins, userId);
+  return db.prepare(`SELECT currency FROM users WHERE id = ?`).get(userId).currency;
+});
+
+function bulkSellTools(userId, toolIds, totalCoins) {
+  return bulkSellToolsTx(userId, toolIds, totalCoins);
 }
 
 const REROLL_COST = 1000;
@@ -706,4 +719,5 @@ module.exports = {
   getListings,
   getListingById,
   buyListing,
+  bulkSellTools,
 };

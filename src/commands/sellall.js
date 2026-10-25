@@ -92,11 +92,8 @@ module.exports = {
       return;
     }
 
-    // Execute the sale
-    for (const t of sellable) {
-      db.removeTool(userId, t.id);
-    }
-    const newBalance = db.addCurrency(userId, totalCoins);
+    // Execute the sale atomically
+    const newBalance = db.bulkSellTools(userId, sellable.map((t) => t.id), totalCoins);
 
     const lines = [
       `Sold **${sellable.length} tool${sellable.length > 1 ? 's' : ''}** for **${totalCoins.toLocaleString()} coins**.`,
