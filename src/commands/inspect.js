@@ -109,6 +109,6 @@ module.exports = {
       .setDescription(lines.join('\n'))
       .setColor(RARITY_COLORS[tool.rarity] || 0x888888);
 
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.reply({ embeds: [embed] });
   },
 };
