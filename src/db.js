@@ -456,7 +456,7 @@ function forceReadyPlots(userId) {
 // ---------- rotating tool shop ----------
 
 const SHOP_SLOTS = 6;
-const SHOP_REFRESH_MS = 8 * 60 * 60 * 1000; // 8 hours
+const SHOP_REFRESH_MS = 10 * 60 * 1000; // 10 minutes
 
 const SHOP_RARITY_WEIGHTS = {
   Common:    45,

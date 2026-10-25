@@ -46,7 +46,7 @@ function buildShopEmbed(userId) {
       },
     )
     .setColor(0xd98e04)
-    .setFooter({ text: `Tools also drop randomly from harvesting. Shop rotates every 8 hours. Reroll costs ${REROLL_COST.toLocaleString()} coins.` });
+    .setFooter({ text: `Tools also drop randomly from harvesting. Shop rotates every 10 minutes. Reroll costs ${REROLL_COST.toLocaleString()} coins.` });
 
   return embed;
 }
