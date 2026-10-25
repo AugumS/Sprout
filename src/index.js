@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { Client, GatewayIntentBits, Collection, Events } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, Events, ActivityType } = require('discord.js');
 const config = require('./config');
 
 const client = new Client({
@@ -21,8 +21,21 @@ for (const file of fs.readdirSync(commandsDir).filter((f) => f.endsWith('.js')))
   client.commands.set(command.data.name, command);
 }
 
+function updatePresence() {
+  const count = client.guilds.cache.size;
+  const inviteUrl = `discord.com/oauth2/authorize?client_id=${config.clientId}&scope=bot+applications.commands&permissions=268537910`;
+  client.user.setPresence({
+    status: 'online',
+    activities: [{
+      name: `🌾 ${count} server${count !== 1 ? 's' : ''} | ${inviteUrl}`,
+      type: ActivityType.Watching,
+    }],
+  });
+}
+
 client.once(Events.ClientReady, async (readyClient) => {
   console.log(`Logged in as ${readyClient.user.tag}. ${client.commands.size} commands loaded.`);
+  updatePresence();
 
   if (process.env.RENDER) {
     try {
@@ -86,6 +99,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
   }
 });
+
+client.on(Events.GuildCreate, () => updatePresence());
+client.on(Events.GuildDelete, () => updatePresence());
 
 // Verification gate: ✅ reaction in #rules → @Farmer role
 client.on(Events.MessageReactionAdd, async (reaction, user) => {
