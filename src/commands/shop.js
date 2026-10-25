@@ -71,31 +71,62 @@ module.exports = {
   },
 
   async handleButton(interaction) {
-    const [, ownerId] = interaction.customId.split(':');
+    const [prefix, ownerId] = interaction.customId.split(':');
 
     if (interaction.user.id !== ownerId) {
       await interaction.reply({ content: "That's not your shop.", ephemeral: true });
       return;
     }
 
-    const result = db.rerollShop(interaction.user.id);
+    // First click: show ephemeral confirmation
+    if (prefix === 'shop_reroll') {
+      const user = db.getOrCreateUser(ownerId);
+      if (user.currency < REROLL_COST) {
+        await interaction.reply({
+          content: `You need **${REROLL_COST.toLocaleString()} coins** to reroll the shop (you have ${user.currency.toLocaleString()}).`,
+          ephemeral: true,
+        });
+        return;
+      }
 
-    if (!result.ok) {
+      const confirmRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`shop_reroll_confirm:${ownerId}`)
+          .setLabel(`Yes, spend ${REROLL_COST.toLocaleString()} coins`)
+          .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+          .setCustomId(`shop_reroll_cancel:${ownerId}`)
+          .setLabel('Cancel')
+          .setStyle(ButtonStyle.Secondary),
+      );
+
       await interaction.reply({
-        content: `You need **${REROLL_COST.toLocaleString()} coins** to reroll the shop.`,
+        content: `Reroll your shop for **${REROLL_COST.toLocaleString()} coins**? This replaces all 6 slots and resets the timer.`,
+        components: [confirmRow],
         ephemeral: true,
       });
       return;
     }
 
-    const embed = buildShopEmbed(interaction.user.id);
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId(`shop_reroll:${interaction.user.id}`)
-        .setLabel(`🎲 Reroll Shop (${REROLL_COST.toLocaleString()} coins)`)
-        .setStyle(ButtonStyle.Secondary)
-    );
+    // Cancel
+    if (prefix === 'shop_reroll_cancel') {
+      await interaction.update({ content: 'Reroll cancelled.', components: [] });
+      return;
+    }
 
-    await interaction.update({ embeds: [embed], components: [row] });
+    // Confirmed
+    if (prefix === 'shop_reroll_confirm') {
+      const result = db.rerollShop(ownerId);
+
+      if (!result.ok) {
+        await interaction.update({
+          content: `You need **${REROLL_COST.toLocaleString()} coins** to reroll the shop.`,
+          components: [],
+        });
+        return;
+      }
+
+      await interaction.update({ content: '🎲 Shop rerolled! Check `/shop` for your new stock.', components: [] });
+    }
   },
 };
