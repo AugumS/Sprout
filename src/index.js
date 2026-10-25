@@ -22,9 +22,19 @@ client.once(Events.ClientReady, async (readyClient) => {
   if (process.env.RENDER) {
     try {
       const channel = await readyClient.channels.fetch('1563710154065838200');
-      const commit = process.env.RENDER_GIT_COMMIT?.slice(0, 7) || null;
-      const commitStr = commit ? ` · [view commit](https://github.com/AugumS/Sprout/commit/${process.env.RENDER_GIT_COMMIT})` : '';
-      await channel.send(`🌱 **Sprout updated and online!**${commitStr}`);
+      const commit = process.env.RENDER_GIT_COMMIT || null;
+      let summary = '';
+      if (commit) {
+        try {
+          const res = await fetch(`https://api.github.com/repos/AugumS/Sprout/commits/${commit}`, {
+            headers: { 'User-Agent': 'Sprout-Bot' },
+          });
+          const data = await res.json();
+          const firstLine = data.commit?.message?.split('\n')[0];
+          if (firstLine) summary = `\n> ${firstLine}`;
+        } catch { /* silently skip if GitHub is unreachable */ }
+      }
+      await channel.send(`🌱 **Sprout updated and online!**${summary}`);
     } catch (err) {
       console.error('Failed to send deploy announcement:', err);
     }
