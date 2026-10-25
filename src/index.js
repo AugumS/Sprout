@@ -49,7 +49,7 @@ client.once(Events.ClientReady, async (readyClient) => {
 client.on(Events.InteractionCreate, async (interaction) => {
   if (interaction.isButton()) {
     const [prefix] = interaction.customId.split(':');
-    if (prefix === 'shop_reroll' || prefix === 'shop_reroll_confirm' || prefix === 'shop_reroll_cancel') {
+    if (prefix === 'shop_reroll') {
       const shop = client.commands.get('shop');
       try {
         await shop.handleButton(interaction);
