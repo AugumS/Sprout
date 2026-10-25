@@ -21,7 +21,7 @@ client.once(Events.ClientReady, async (readyClient) => {
 
   if (process.env.RENDER) {
     try {
-      const channel = await readyClient.channels.fetch('1563710154065838200');
+      const channel = await readyClient.channels.fetch('1563714260087865456');
       const commit = process.env.RENDER_GIT_COMMIT || null;
       let summary = '';
       if (commit) {

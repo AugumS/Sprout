@@ -4,3 +4,4 @@ node_modules/
 *.sqlite-journal
 *.db
 npm-debug.log*
+farm.sqlite
