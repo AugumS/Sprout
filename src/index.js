@@ -23,7 +23,7 @@ for (const file of fs.readdirSync(commandsDir).filter((f) => f.endsWith('.js')))
 
 function updatePresence() {
   const count = client.guilds.cache.size;
-  const inviteUrl = `discord.com/oauth2/authorize?client_id=${config.clientId}&scope=bot+applications.commands&permissions=268537910`;
+  const inviteUrl = `discord.gg/zMPaRmxhVU`;
   client.user.setPresence({
     status: 'online',
     activities: [{
