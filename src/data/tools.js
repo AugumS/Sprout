@@ -28,21 +28,23 @@ const TOOL_TYPES = {
 };
 
 const RARITY_TIERS = {
-  Common: { bonus: 0, shopPrice: 50, dropWeight: 60 },
-  Uncommon: { bonus: 0.1, shopPrice: 150, dropWeight: 25 },
-  Rare: { bonus: 0.2, shopPrice: 400, dropWeight: 10 },
-  Epic: { bonus: 0.35, shopPrice: 900, dropWeight: 4 },
-  Mythic: { bonus: 0.5, shopPrice: 2000, dropWeight: 1 },
+  Common:    { bonus: 0,    shopPrice: 50,   dropWeight: 60  },
+  Uncommon:  { bonus: 0.1,  shopPrice: 150,  dropWeight: 25  },
+  Rare:      { bonus: 0.2,  shopPrice: 400,  dropWeight: 10  },
+  Epic:      { bonus: 0.35, shopPrice: 900,  dropWeight: 4   },
+  Legendary: { bonus: 0.5,  shopPrice: 2000, dropWeight: 1   },
+  Ultra:     { bonus: 0.65, shopPrice: 5000, dropWeight: 0.5 },
 };
 
 const RARITY_ORDER = Object.keys(RARITY_TIERS);
 
 const RARITY_CIRCLE = {
-  Common:   '⚪',
-  Uncommon: '🟢',
-  Rare:     '🔵',
-  Epic:     '🟣',
-  Mythic:   '🟡',
+  Common:    '⚪',
+  Uncommon:  '🟢',
+  Rare:      '🔵',
+  Epic:      '🟣',
+  Legendary: '🟠',
+  Ultra:     '🔴',
 };
 
 function getToolType(id) {

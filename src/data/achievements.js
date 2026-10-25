@@ -1,7 +1,8 @@
 const ACHIEVEMENTS = {
   first_harvest:  { id: 'first_harvest',  name: 'Green Thumb',     emoji: '🌱', description: 'Harvest your first crop' },
   first_golden:   { id: 'first_golden',   name: 'Golden Touch',    emoji: '✨', description: 'Get your first golden harvest' },
-  first_mythic:   { id: 'first_mythic',   name: 'Legend',          emoji: '🟡', description: 'Obtain a Mythic tool' },
+  first_mythic:   { id: 'first_mythic',   name: 'Legend',          emoji: '🟠', description: 'Obtain a Legendary tool' },
+  first_ultra:    { id: 'first_ultra',    name: 'Beyond Legend',   emoji: '🔴', description: 'Obtain an Ultra tool' },
   crops_100:      { id: 'crops_100',      name: 'Prolific Farmer', emoji: '🌾', description: 'Harvest 100 total crops' },
   crops_1000:     { id: 'crops_1000',     name: 'Master Farmer',   emoji: '🏆', description: 'Harvest 1,000 total crops' },
   gold_1000:      { id: 'gold_1000',      name: 'Prosperous',      emoji: '💰', description: 'Earn 1,000 total coins' },

@@ -1,30 +1,36 @@
 const { getBonus, RARITY_TIERS } = require('./tools');
 
 const STAT_DEFS = {
-  grow_reduction: { name: 'Grow Reduction', emoji: '⏱️', primary_for: 'hoe',         description: 'Reduces how long crops take to grow' },
-  yield_bonus:    { name: 'Yield Bonus',    emoji: '💰', primary_for: 'wateringcan',  description: 'Increases coins earned per harvest' },
-  shears_bonus:   { name: 'Harvest Bonus',  emoji: '✂️', primary_for: 'shears',       description: 'Chance to earn a bonus payout on each crop' },
-  golden_chance:  { name: 'Golden Chance',  emoji: '⭐',                              description: 'Chance for a crop to yield a golden bonus payout' },
-  tool_find:      { name: 'Tool Find',      emoji: '🔍',                              description: 'Increased chance to find a tool while harvesting' },
+  grow_reduction: { name: 'Grow Reduction', emoji: '⏱️', primary_for: 'hoe',        description: 'Reduces how long crops take to grow' },
+  yield_bonus:    { name: 'Yield Bonus',    emoji: '💰', primary_for: 'wateringcan', description: 'Increases coins earned per harvest' },
+  shears_bonus:   { name: 'Harvest Bonus',  emoji: '✂️', primary_for: 'shears',      description: 'Chance to earn a bonus payout on each crop' },
+  golden_chance:  { name: 'Golden Chance',  emoji: '⭐',                             description: 'Chance for a crop to yield a golden bonus payout' },
+  tool_find:      { name: 'Tool Find',      emoji: '🔍',                             description: 'Increased chance to find a tool while harvesting' },
+  bonus_yield:    { name: 'Bonus Yield',    emoji: '🌾',                             description: 'Chance to harvest an extra crop per plot' },
+  xp_boost:       { name: 'XP Boost',       emoji: '⚡',                             description: 'Bonus EXP this tool earns per harvest use', isFlat: true },
+  coin_bonus:     { name: 'Coin Bonus',     emoji: '🪙',                             description: 'Flat % bonus to all coins earned on harvest' },
+  seed_return:    { name: 'Seed Return',    emoji: '🌱',                             description: 'Chance to get a seed back when harvesting a plot' },
+  double_drop:    { name: 'Double Drop',    emoji: '✨',                             description: 'Chance to double all crop drops and coins this harvest', maxRoll: 5 },
 };
 
 // Rolled primary stat range per rarity (percentage points)
 const PRIMARY_RANGES = {
-  Common:   [1,  5],
-  Uncommon: [6,  15],
-  Rare:     [16, 28],
-  Epic:     [29, 42],
-  Mythic:   [43, 60],
+  Common:    [1,  5],
+  Uncommon:  [6,  15],
+  Rare:      [16, 28],
+  Epic:      [29, 42],
+  Legendary: [43, 60],
+  Ultra:     [61, 80],
 };
 
 const SECONDARY_COUNT = {
-  Common: 0, Uncommon: 1, Rare: 1, Epic: 2, Mythic: 3,
+  Common: 1, Uncommon: 2, Rare: 2, Epic: 3, Legendary: 4, Ultra: 5,
 };
 
 const MAX_LEVEL = 20;
 
 const EXP_PER_RARITY = {
-  Common: 2, Uncommon: 5, Rare: 12, Epic: 25, Mythic: 50,
+  Common: 2, Uncommon: 5, Rare: 12, Epic: 25, Legendary: 50, Ultra: 100,
 };
 
 // Cumulative EXP required to reach a given level
@@ -58,7 +64,7 @@ function getStatRange(statKey, toolTypeId, rarity) {
   if (!def) return null;
   if (def.primary_for === toolTypeId) return [pMin, pMax];
   // Secondary stat range
-  const secMax = Math.max(1, Math.round(pMax * 0.45));
+  const secMax = def.maxRoll != null ? def.maxRoll : Math.max(1, Math.round(pMax * 0.45));
   return [1, secMax];
 }
 
@@ -84,7 +90,8 @@ function rollStats(toolTypeId, rarity) {
   for (let i = 0; i < secondaryCount && pool.length > 0; i++) {
     const idx = Math.floor(Math.random() * pool.length);
     const key = pool.splice(idx, 1)[0];
-    const secMax = Math.max(1, Math.round(max * 0.45));
+    const def = STAT_DEFS[key];
+    const secMax = def.maxRoll != null ? def.maxRoll : Math.max(1, Math.round(max * 0.45));
     stats[key] = rollBetween(1, secMax);
   }
 
@@ -138,6 +145,31 @@ function getEffectiveToolFind(toolRow) {
   return stats ? (stats.tool_find || 0) / 100 : 0;
 }
 
+function getEffectiveBonusYield(toolRow) {
+  const stats = _parsedStats(toolRow);
+  return stats ? (stats.bonus_yield || 0) / 100 : 0;
+}
+
+function getEffectiveXpBoost(toolRow) {
+  const stats = _parsedStats(toolRow);
+  return stats ? (stats.xp_boost || 0) : 0;
+}
+
+function getEffectiveCoinBonus(toolRow) {
+  const stats = _parsedStats(toolRow);
+  return stats ? (stats.coin_bonus || 0) / 100 : 0;
+}
+
+function getEffectiveSeedReturn(toolRow) {
+  const stats = _parsedStats(toolRow);
+  return stats ? (stats.seed_return || 0) / 100 : 0;
+}
+
+function getEffectiveDoubleDrop(toolRow) {
+  const stats = _parsedStats(toolRow);
+  return stats ? (stats.double_drop || 0) / 100 : 0;
+}
+
 function getToolSellValue(toolRow) {
   const base = Math.round((RARITY_TIERS[toolRow.rarity]?.shopPrice || 0) * 0.4);
   const level = expToLevel(toolRow.exp || 0);
@@ -161,5 +193,10 @@ module.exports = {
   getEffectiveShears,
   getEffectiveGolden,
   getEffectiveToolFind,
+  getEffectiveBonusYield,
+  getEffectiveXpBoost,
+  getEffectiveCoinBonus,
+  getEffectiveSeedReturn,
+  getEffectiveDoubleDrop,
   getToolSellValue,
 };

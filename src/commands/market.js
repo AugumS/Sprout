@@ -9,6 +9,11 @@ const STAT_DEFS = {
   shears_bonus:   { emoji: '✂️', label: 'Harvest Bonus' },
   golden_chance:  { emoji: '⭐', label: 'Golden Chance' },
   tool_find:      { emoji: '🔍', label: 'Tool Find' },
+  bonus_yield:    { emoji: '🌾', label: 'Bonus Yield' },
+  xp_boost:       { emoji: '⚡', label: 'XP Boost', isFlat: true },
+  coin_bonus:     { emoji: '🪙', label: 'Coin Bonus' },
+  seed_return:    { emoji: '🌱', label: 'Seed Return' },
+  double_drop:    { emoji: '✨', label: 'Double Drop' },
 };
 
 function formatToolLine(row) {
@@ -20,7 +25,7 @@ function formatToolLine(row) {
   const statParts = Object.entries(stats).map(([key, val]) => {
     const def = STAT_DEFS[key];
     if (!def) return null;
-    return `${def.emoji} ${def.label}: **${val}%**`;
+    return `${def.emoji} ${def.label}: **${val}${def.isFlat ? '' : '%'}**`;
   }).filter(Boolean);
 
   return {

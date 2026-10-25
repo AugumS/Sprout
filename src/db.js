@@ -369,9 +369,16 @@ function checkAndAwardAchievements(userId) {
 
   if (!earned.has('first_mythic')) {
     const hasMythic = db.prepare(
-      `SELECT COUNT(*) as c FROM inventory WHERE user_id = ? AND item_type = 'tool' AND rarity = 'Mythic'`
+      `SELECT COUNT(*) as c FROM inventory WHERE user_id = ? AND item_type = 'tool' AND rarity IN ('Mythic','Legendary','Ultra')`
     ).get(userId).c > 0;
     if (hasMythic) newIds.push('first_mythic');
+  }
+
+  if (!earned.has('first_ultra')) {
+    const hasUltra = db.prepare(
+      `SELECT COUNT(*) as c FROM inventory WHERE user_id = ? AND item_type = 'tool' AND rarity = 'Ultra'`
+    ).get(userId).c > 0;
+    if (hasUltra) newIds.push('first_ultra');
   }
 
   if (!earned.has('full_garden')) {
@@ -452,16 +459,17 @@ const SHOP_SLOTS = 6;
 const SHOP_REFRESH_MS = 8 * 60 * 60 * 1000; // 8 hours
 
 const SHOP_RARITY_WEIGHTS = {
-  Common:   45,
-  Uncommon: 30,
-  Rare:     16,
-  Epic:      7,
-  Mythic:    2,
+  Common:    45,
+  Uncommon:  30,
+  Rare:      16,
+  Epic:       7,
+  Legendary:  2,
+  Ultra:      1,
 };
-const SHOP_RARITY_ORDER = ['Common', 'Uncommon', 'Rare', 'Epic', 'Mythic'];
+const SHOP_RARITY_ORDER = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Ultra'];
 const SHOP_RARITY_TOTAL = Object.values(SHOP_RARITY_WEIGHTS).reduce((a, b) => a + b, 0);
 
-const RARITY_SHOP_PRICE = { Common: 50, Uncommon: 150, Rare: 400, Epic: 900, Mythic: 2000 };
+const RARITY_SHOP_PRICE = { Common: 50, Uncommon: 150, Rare: 400, Epic: 900, Legendary: 2000, Ultra: 5000 };
 
 function rollShopRarity() {
   let roll = Math.random() * SHOP_RARITY_TOTAL;

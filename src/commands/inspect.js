@@ -15,11 +15,12 @@ const {
 } = require('../data/stats');
 
 const RARITY_COLORS = {
-  Common:   0xaaaaaa,
-  Uncommon: 0x57b86a,
-  Rare:     0x4a90d9,
-  Epic:     0xa855f7,
-  Mythic:   0xf2b705,
+  Common:    0xaaaaaa,
+  Uncommon:  0x57b86a,
+  Rare:      0x4a90d9,
+  Epic:      0xa855f7,
+  Legendary: 0xff8c00,
+  Ultra:     0xe74c3c,
 };
 
 function expBar(totalExp, barLength = 12) {
@@ -67,12 +68,13 @@ module.exports = {
           if (!def) return null;
           const isPrimary = def.primary_for === tool.item_id;
           const desc = def.description ? ` — *${def.description}*` : '';
+          const unit = def.isFlat ? '' : '%';
           if (isPrimary) {
-            return `${def.emoji} **${def.name}:** ${val}% *(${rarityMin}–${rarityMax})*${desc}`;
+            return `${def.emoji} **${def.name}:** ${val}${unit} *(${rarityMin}–${rarityMax})*${desc}`;
           }
           const range = getStatRange(key, tool.item_id, tool.rarity);
           const rangeStr = range ? ` *(${range[0]}–${range[1]})*` : '';
-          return `${def.emoji} **${def.name}:** ${val}%${rangeStr}${desc}`;
+          return `${def.emoji} **${def.name}:** ${val}${unit}${rangeStr}${desc}`;
         }).filter(Boolean)
       : ['*No stats (legacy tool)*'];
 
